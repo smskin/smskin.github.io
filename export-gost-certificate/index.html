@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="ru-RU">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="assets/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/style.css">
+    <title>Конвертация КЭП в PEM формат</title>
+</head>
+<body>
+<header>
+    <div class="container">
+        <h1 class="title">Конвертация КЭП в PEM формат</h1>
+        <p>Данный сервис помогает конвертировать выгруженный КЭП в PEM формат для дальнейшего использования его в
+            сервисах.</p>
+        <div class="row nav-container">
+            <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+                <li class="nav-item col-6">
+                    <a class="nav-link active" id="cryptopro-tab" data-toggle="pill" href="#cryptopro" role="tab"
+                       aria-controls="cryptopro" aria-selected="true">КриптоПРО</a>
+                </li>
+                <li class="nav-item col-6">
+                    <a class="nav-link" id="vipnet-tab" data-toggle="pill" href="#vipnet" role="tab"
+                       aria-controls="vipnet" aria-selected="false">VIPNet</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</header>
+
+<main>
+    <div class="container">
+        <div class="tab-content" id="pills-tabContent">
+            <div class="tab-pane fade show active" id="cryptopro" role="tabpanel" aria-labelledby="cryptopro-tab">
+                <h2 class="tab-title">Для экспорта ключа выполните следующие шаги:</h2>
+                <ol class="task-list">
+                    <li>Установите КЭП в компьютер и запустите КриптоПро</li>
+                    <li>
+                        Откройте вкладку "Сервис" и нажмите "Скопировать"
+                        <div class="screenshot">
+                            <img src="assets/1.png" alt="screenshot">
+                        </div>
+                    </li>
+                    <li>В открывшемся окне нажмите "Обзор", выберите нужный ключ и нажмите "ОК", а затем "Далее"</li>
+                    <li>
+                        Введите название для создаваемого контейнера и нажмите кнопку “Готово”
+                        <div class="screenshot">
+                            <img src="assets/2.png" alt="screenshot">
+                        </div>
+                    </li>
+                    <li>
+                        Выберите в списке устройств установленную <b>ПУСТУЮ</b> флешку и нажмите “ОК”
+                        <div class="bd-callout bd-callout-warning">
+                            <h5 class="warning">ВНИМАНИЕ!</h5>
+                            <p>Пароль для для создаваемого контейнера задавать не нужно, просто нажмите кнопку ”ОК”, КЭП
+                                будет скопирована на флешку</p>
+                        </div>
+                    </li>
+                    <li>
+                        Нажмите кнопку “Загрузить файлы" (ниже), выберите флешку, на которую скопирован КЭП, и откройте
+                        папку с названием контейнера, который был указан на шаге 4 в ней выделите файлы <b>"header.key",
+                        "name.key", "primary.key", "masks.key", "primary2.key", "masks2.key"</b> и нажмите “Открыть”.
+                        Все преобразования происходят локально, на вашем компьютере. Вы можете отключить интернет и
+                        после этого загружать файлы. Ваши данные не передаются в сеть.
+                        <div id="file-messagebox-crypto" class="alert d-none" role="alert"></div>
+
+                        <div id="export-messagebox-crypto" class="alert alert-success d-none" role="alert">
+                            Экспорт прошел успешно!
+                        </div>
+
+                        <div class="button-box">
+                            <button class="btn btn-primary">Загрузить файлы для экспорта</button>
+                            <input id="fileStoreCrypto" type="file" multiple="" accept=".key"
+                                   onchange="cryptoPro.readStoreFiles(this)">
+                            <input id="headerKey" type="hidden">
+                            <input id="nameKey" type="hidden">
+                            <input id="primaryKey" type="hidden">
+                            <input id="masksKey" type="hidden">
+                            <input id="primary2Key" type="hidden">
+                            <input id="masks2Key" type="hidden">
+                            <input id="privateKeyCrypto" type="hidden">
+                            <input id="certificateCrypto" type="hidden">
+                        </div>
+
+                        <div id="password-box-crypto" class="d-none">
+                            <label for="password">Пароль</label>
+                            <input type="password" id="passwordCrypto">
+                            <button id="exportCrypto" class="btn btn-primary" onclick="cryptoPro.exportCredentials()"
+                                    disabled>Загрузить
+                            </button>
+                        </div>
+
+                        <div id="certBox-crypto" class="d-none">
+                            <div class="bd-callout bd-callout-warning">
+                                <h5 class="warning">В контейнере не обнаружен сертификат.</h5>
+                                <p>Необходимо загрузить его отдельно.</p>
+                                <div class="button-box">
+                                    <button class="btn btn-primary">Загрузить сертификат</button>
+                                    <input type="file" id="certFileCrypto" accept=".cert, .crt"
+                                           onchange="cryptoPro.readCert(this)">
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        Нажмите кнопку "Скачать файл".<br>
+                        Из полученного файла, необходимо извлечь сертификат и ключ.
+                        <ul>
+                            <li>Сертификат обозначен строками "BEGIN CERTIFICATE" и "END CERTIFICATE" - необходимо
+                                скопировать текст сертификата (включая строки begin и end) в отдельный файл (создайте
+                                пустой файл в блокноте), в формате .crt (при сохранении, выберите Тип файла: "Все
+                                файлы", и назовите файл cert.crt)
+                            </li>
+                            <li>Аналогично сохранить в отдельный файл ключ. Ключ обозначен строками "BEGIN PRIVATE KEY"
+                                и "END PRIVATE KEY" Сохранить как secret.key
+                            </li>
+                        </ul>
+                        По дальнейшим шагам, либо возникшим вопросам, обратитесь к специалисту технической поддержки.
+                        <div class="button-box">
+                            <button id="saveCrypto" class="btn btn-primary" onclick="cryptoPro.saveFile()" disabled>
+                                Скачать файл
+                            </button>
+                        </div>
+                    </li>
+                </ol>
+            </div>
+
+            <div class="tab-pane fade" id="vipnet" role="tabpanel" aria-labelledby="vipnet-tab">
+                <h2 class="tab-title">Для экспорта ключа выполните следующие шаги:</h2>
+                <ol class="task-list">
+                    <li>
+                        <div id="file-messagebox-vipnet" class="alert d-none" role="alert"></div>
+
+                        <div id="export-messagebox-vipnet" class="alert alert-success d-none" role="alert">
+                            Экспорт прошел успешно!
+                        </div>
+
+                        <div class="button-box">
+                            <button class="btn btn-primary">Загрузить файлы для экспорта</button>
+                            <input id="fileStoreVipnet" type="file" onchange="vipNet.readStoreFiles(this)">
+                            <input id="vipnetKey" type="hidden">
+                            <input type="hidden" id="privateKeyVipnet">
+                            <input type="hidden" id="certificateVipnet">
+                        </div>
+
+                        <div id="password-box-vipnet" class="d-none">
+                            <label for="password">Пароль</label>
+                            <input type="password" id="passwordVipnet">
+                            <button id="exportVipnet" class="btn btn-primary" onclick="vipNet.exportCredentials()"
+                                    disabled>Загрузка
+                            </button>
+                        </div>
+
+                        <div id="certBox-vipnet" class="d-none">
+                            <div class="bd-callout bd-callout-warning">
+                                <h5 class="warning">В контейнере не обнаружен сертификат.</h5>
+                                <p>Необходимо загрузить его отдельно.</p>
+                                <div class="button-box">
+                                    <button class="btn btn-primary">Загрузить сертификат</button>
+                                    <input type="file" id="certFileVipnet" accept=".cert, .crt"
+                                           onchange="vipNet.readCert(this)">
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        Нажмите кнопку "Скачать файл".
+                        <div class="button-box">
+                            <button id="saveVipnet" class="btn btn-primary" onclick="vipNet.saveFile()" disabled>Скачать
+                                файл
+                            </button>
+                        </div>
+                    </li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="assets/prettify.js"></script>
+<script src="assets/lang-css.js"></script>
+<script src="assets/gostCrypto.js"></script>
+<script src="assets/gostCoding.js"></script>
+<script src="assets/gostSecurity.js"></script>
+<script src="assets/gostASN1.js"></script>
+<script src="assets/gostCert.js"></script>
+<script src="assets/gostCMS.js"></script>
+<script src="assets/gostKeys.js"></script>
+<script src="assets/FileSaver.js"></script>
+<script src="assets/gostViewer.js"></script>
+<script src="assets/jquery-3.3.1.min.js"></script>
+<script src="assets/bootstrap.min.js"></script>
+<script>
+    function translate(msg) {
+        var translate_txt = new Map([
+            ['Incorrect fp', 'Неправильный пароль!'],
+            ['Invalid key password', 'Неправильный пароль!'],
+            ['Unsupported ViPNet container type', 'Неподдерживаемый ViPNet тип контейнера'],
+            ['The public key of the certificate does not match the private key', 'Публичный ключ сертификата не подходит приватному ключу']
+        ]);
+        if (translate_txt.get(msg)) {
+            return translate_txt.get(msg);
+        }
+        return msg;
+    }
+</script>
+<script>
+    class KeyBuilder {
+        addToContainer(result, filename) {
+            throw "abstract method";
+        }
+
+        export(keyContainer) {
+            var keyBuilder = this;
+            return keyContainer.getKey(keyBuilder.password.value).then(function (key) {
+                keyBuilder.privateKey.value = key.encode('PEM');
+                //checkCertAndKey();
+                return keyContainer.getCertificate();
+            }).then(function (cert) {
+                keyBuilder.certificate.value = cert && Object.values(cert.items).length > 0 ? cert.encode('PEM') : '';
+                // warning on
+                if (!keyBuilder.certificate.value) keyBuilder.boxOn(keyBuilder.certBox);
+                keyBuilder.boxOn(keyBuilder.exportMessageBox);
+                keyBuilder.buttonOn(keyBuilder.saveButton);
+            }).catch(function (e) {
+                alert(translate(e.message));
+                keyBuilder.boxOn(keyBuilder.passwordBox);
+            });
+        }
+
+        exportCredentials() {
+            throw "abstract method";
+        }
+
+        checkStoreFiles() {
+            var error = false;
+
+            this.containers.forEach(function (value, key) {
+                if (!value) {
+                    error = true;
+                    return;
+                }
+            });
+
+            if (error) {
+                this.errorOn(this.fileMessageBox, "Не все файлы добавлены!");
+            } else {
+                this.errorOff(this.fileMessageBox, "Все файлы добавлены!");
+                this.buttonOn(this.exportButton);
+                this.exportCredentials();
+            }
+            this.boxOn(this.fileMessageBox);
+        }
+
+        readStoreFiles(input) {
+            var reader, result, file;
+            var key = this;
+            var count = input.files.length;
+            this.restore(); // restore state
+            for (var i = 0; i < input.files.length; i++) {
+                (function (file) {
+                    reader = new FileReader();
+                    reader.onload = function (e) {
+                        result = gostCrypto.coding.Base64.encode(e.target.result);
+                        key.addToContainer(result, file.name);
+                        count--;
+                        if (!count) {
+                            key.checkStoreFiles();
+                            input.value = '';
+                        }
+                    };
+                    reader.readAsArrayBuffer(file);
+                })(input.files[i]);
+            }
+        }
+
+        readFile(input, node, name) {
+            var keyBuilder = this;
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                var data = e.target.result, text;
+                try {
+                    text = gostCrypto.coding.PEM.encode(data, name);
+                } catch (e) {
+                    text = gostCrypto.coding.Base64.encode(data);
+                }
+                node.value = text;
+                keyBuilder.verifyCertificate();
+                input.value = '';
+            };
+            if (input.files.length > 0)
+                reader.readAsArrayBuffer(input.files[0]);
+        }
+
+        readCert(input) {
+            this.readFile(input, this.certificate, 'CERTIFICATE');
+        }
+
+        saveFile() {
+            var filename = "certificate_privatekey";
+            var txt = this.certificate.value;
+            txt += "\n\n" + this.privateKey.value;
+            if (txt.trim()) {
+                saveAs(new Blob([txt],
+                    {type: 'text/plain'}), filename);
+            }
+        }
+
+        verifyCertificate() {
+            var keyBuilder = this;
+            var keyContainer = new gostCrypto.keys.CryptoProKeyContainer();
+            // Add key to conatiner
+            return keyContainer.setKey(keyBuilder.privateKey.value, keyBuilder.password.value).then(function () {
+                // Add certificate to container
+                return keyContainer.setCertificate(keyBuilder.certificate.value);
+            }).then(function () {
+                keyBuilder.boxOff(keyBuilder.certBox);
+                keyBuilder.exportMessageBox.innerHTML += "\nСертификат добавлен.";
+            }).catch(function (e) {
+                keyBuilder.certificate.value = '';
+                alert(translate(e.message));
+            });
+        }
+
+        restore() {
+            var containers = this.containers;
+            this.containers.forEach(function (value, key) {
+                containers.set(key, false);
+            });
+            this.password.value = '';
+            this.boxOff(this.fileMessageBox);
+            this.boxOff(this.exportMessageBox);
+            this.boxOff(this.passwordBox);
+            this.boxOff(this.certBox);
+            this.buttonOff(this.exportButton);
+            this.buttonOff(this.saveButton);
+        }
+
+        errorOn(box, message) {
+            box.classList.remove('alert-success');
+            box.classList.add('alert-danger');
+            box.innerHTML = message;
+        }
+
+        errorOff(box, message) {
+            box.classList.add('alert-success');
+            box.classList.remove('alert-danger');
+            box.innerHTML = message;
+        }
+
+        boxOn(box) {
+            box.classList.remove('d-none');
+        }
+
+        boxOff(box) {
+            box.classList.add('d-none');
+        }
+
+        buttonOn(button) {
+            button.disabled = false;
+        }
+
+        buttonOff(button) {
+            button.disabled = true;
+        }
+    }
+
+    class CryptoPro extends KeyBuilder {
+        constructor() {
+            super();
+            this.available_names = ['headerKey', 'nameKey', 'primaryKey', 'masksKey', 'primary2Key', 'masks2Key'];
+            this.containers = new Map([
+                ['headerKey', false],
+                ['nameKey', false],
+                ['primaryKey', false],
+                ['masksKey', false],
+                ['primary2Key', false],
+                ['masks2Key', false]
+            ]);
+            // containers
+            this.fileMessageBox = document.getElementById('file-messagebox-crypto');
+            this.exportMessageBox = document.getElementById('export-messagebox-crypto');
+            this.passwordBox = document.getElementById('password-box-crypto');
+            this.certBox = document.getElementById('certBox-crypto');
+            // buttons
+            this.fileSaveButton = document.getElementById('fileStoreCrypto');
+            this.exportButton = document.getElementById('exportCrypto');
+            this.saveButton = document.getElementById('saveCrypto');
+            // keys
+            this.privateKey = document.getElementById('privateKeyCrypto');
+            this.certificate = document.getElementById('certificateCrypto');
+            // fields
+            this.password = document.getElementById('passwordCrypto');
+        }
+
+        addToContainer(result, filename) {
+            var name = filename.toLowerCase().replace('.key', 'Key');
+            console.log(name);
+            if (this.available_names.includes(name)) {
+                document.getElementById(name).value = result;
+                // mark added file
+                this.containers.set(name, true);
+            }
+        }
+
+        exportCredentials() {
+            var crypto = this;
+            var keyContainer = new gostCrypto.keys.CryptoProKeyContainer({
+                header: headerKey.value,
+                name: nameKey.value,
+                primary: primaryKey.value,
+                masks: masksKey.value,
+                primary2: primary2Key.value,
+                masks2: masks2Key.value
+            });
+            return this.export(keyContainer);
+        }
+    }
+
+    class VIPNet extends KeyBuilder {
+        constructor() {
+            super();
+            this.containers = new Map([
+                ['vipnetKey', false],
+            ]);
+            // containers
+            this.fileMessageBox = document.getElementById('file-messagebox-vipnet');
+            this.exportMessageBox = document.getElementById('export-messagebox-vipnet');
+            this.passwordBox = document.getElementById('password-box-vipnet');
+            this.certBox = document.getElementById('certBox-vipnet');
+            // buttons
+            this.fileSaveButton = document.getElementById('fileStoreVipnet');
+            this.exportButton = document.getElementById('exportVipnet');
+            this.saveButton = document.getElementById('saveVipnet');
+            // keys
+            this.privateKey = document.getElementById('privateKeyVipnet');
+            this.certificate = document.getElementById('certificateVipnet');
+            // fields
+            this.password = document.getElementById('passwordVipnet');
+        }
+
+        addToContainer(result, filename) {
+            var name = 'vipnetKey';
+            document.getElementById(name).value = result;
+            // mark added file
+            this.containers.set(name, true);
+        }
+
+        exportCredentials() {
+            try {
+                var keyContainer = new gostCrypto.keys.ViPNetContainer(vipnetKey.value);
+                return this.export(keyContainer);
+            } catch (e) {
+                alert(translate(e.message));
+            }
+        }
+    }
+
+    var cryptoPro = new CryptoPro();
+    var vipNet = new VIPNet();
+</script>
+</body>
+</html>

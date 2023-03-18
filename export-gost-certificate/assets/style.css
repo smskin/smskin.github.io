@@ -1,0 +1,68 @@
+header {
+    padding: 30px 0;
+}
+
+.title {
+    margin-bottom: 30px;
+}
+
+.nav-container {
+    display: block;
+}
+
+.tab-title {
+    margin-bottom: 20px;
+}
+
+.warning {
+    font-weight: 700;
+}
+
+.bd-callout {
+    padding: 1.25rem;
+    margin-top: 1.25rem;
+    margin-bottom: 1.25rem;
+    border: 1px solid #eee;
+    border-left-width: .25rem;
+    border-radius: .25rem;
+}
+
+.bd-callout-warning {
+    border-left-color: #f0ad4e;
+}
+
+.task-list li{
+    margin-bottom: 20px;
+}
+
+.alert li {
+    margin-bottom: 0;
+}
+
+.screenshot {
+    margin-top: 20px;
+}
+
+.button-box {
+    position: relative;
+    overflow: hidden;
+    margin: 20px 0;
+}
+
+.button-box > input[type="file"] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    border: none;
+    cursor: pointer;
+    outline: none;
+    opacity: 0;
+    filter: alpha(opacity=0);
+}
+
+.password-box label {
+    font-weight: 700;
+}
